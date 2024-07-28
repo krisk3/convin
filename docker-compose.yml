@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app/:/app
+    image: app:django
+    container_name: django_container
+    command: >
+      sh -c "python manage.py wait_for_db &&
+             python manage.py makemigrations &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    environment:
+      - SECRET_KEY=django-insecure-x)9+7jvzl65bux!pea*(_69*l4m^siwgdi9j@j@3z@zq$lxq!e
+      - DB_ENGINE=django.db.backends.postgresql
+      - DB_HOST=db
+      - DB_NAME=convin_db
+      - DB_USER=kuriakose
+      - DB_PASS=Password#123
+      - DB_PORT=5432
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16.3-alpine3.20
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=convin_db
+      - POSTGRES_USER=kuriakose
+      - POSTGRES_PASSWORD=Password#123
+    container_name: postgres_db
+
+volumes:
+  db-data:
