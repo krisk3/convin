@@ -2,7 +2,7 @@
 Backend Intern Task for Convin AI
 
 ## Demo
-You can preview the demo working of the django project at: https://youtu.be/iFrzwARpY5o
+You can preview the demo working of the django project at: https://youtu.be/UW34r8IWoqA
 
 ## Installation
 
