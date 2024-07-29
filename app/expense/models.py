@@ -8,7 +8,7 @@ User = get_user_model()
 # Create your models here.
 class Expense(models.Model):
     """
-
+    Model to store the expense details.
     """
     amount = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(1.0)])
     split_type = models.CharField(max_length=10, choices=validators.SPLIT_CHOICES, default='equal')
@@ -26,7 +26,7 @@ class Expense(models.Model):
 
 class UserExpense(models.Model):
     """
-
+    Model to store the user expense details.
     """
     expense = models.ForeignKey(Expense, on_delete=models.CASCADE, related_name='userexpenses')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='userexpenses')

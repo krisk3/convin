@@ -6,7 +6,11 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
-from .serializers import ExpenseSerializer, IndividualExpenseSerializer, IndividualExpenseSerializer
+from .serializers import (
+    ExpenseSerializer,
+    IndividualExpenseSerializer,
+    IndividualExpenseSerializer,
+    ExpenseDetailSerializer)
 from .models import Expense, UserExpense
 
 
@@ -237,6 +241,40 @@ class IndividualExpenseView(APIView):
         if user:
             user_expenses = UserExpense.objects.filter(user=user)
             serializer = IndividualExpenseSerializer(user_expenses, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+
+@extend_schema(
+    parameters=[
+        OpenApiParameter(name='email', type=OpenApiTypes.EMAIL, description='Email of the user.', required=False),
+        OpenApiParameter(name='mobile', type=OpenApiTypes.STR, description='Mobile of the user.', required=False),
+    ],
+    responses={status.HTTP_200_OK: ExpenseDetailSerializer(many=True)}
+)
+class ExpenseDetailView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = ExpenseDetailSerializer
+
+    def get(self, request, *args, **kwargs):
+        User = get_user_model()
+        email = request.query_params.get('email', None)
+        mobile = request.query_params.get('mobile', None)
+
+        if email:
+            user = User.objects.filter(email=email).first()
+        elif mobile:
+            user = User.objects.filter(mobile=mobile).first()
+        elif email and mobile:
+            user = User.objects.filter(email=email, mobile=mobile).first()
+        else:
+            return Response({"error": "Email or mobile number must be provided."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if user:
+            expenses = Expense.objects.filter(creator=user)
+            serializer = ExpenseDetailSerializer(expenses, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)

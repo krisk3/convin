@@ -47,3 +47,34 @@ class IndividualExpenseSerializer(serializers.ModelSerializer):
                   'amount_owed',
                   'percentage_owed']
 
+
+class ExpenseSerializer3(serializers.ModelSerializer):
+    class Meta:
+        model = models.Expense
+        fields = ['title',
+                  'creator',
+                  'amount',
+                  'split_type',
+                  'date_created',]
+
+
+class UserExpenseSerializer2(serializers.ModelSerializer):
+    user_name = serializers.SerializerMethodField()
+    class Meta:
+        model = models.UserExpense
+        fields = ['user_name', 'amount_owed', 'percentage_owed']
+
+    def get_user_name(self, obj):
+        return obj.user.name
+
+
+class ExpenseDetailSerializer(serializers.ModelSerializer):
+    user_expenses = UserExpenseSerializer2(source='userexpenses', many=True)
+    creator_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.Expense
+        fields = ['title', 'creator_name', 'amount', 'split_type', 'date_created', 'user_expenses']
+
+    def get_creator_name(self, obj):
+        return obj.creator.name
