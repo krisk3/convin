@@ -26,7 +26,7 @@ class Expense(models.Model):
 
 class UserExpense(models.Model):
     """
-    Model to store the user expense details.
+    Model to store the expense owed by user.
     """
     expense = models.ForeignKey(Expense, on_delete=models.CASCADE, related_name='userexpenses')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='userexpenses')

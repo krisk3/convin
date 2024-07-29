@@ -33,29 +33,27 @@ class ExpenseSerializer(serializers.ModelSerializer):
 
 
 class ExpenseSerializer2(serializers.ModelSerializer):
+    creator_name = serializers.SerializerMethodField()
     class Meta:
         model = models.Expense
         fields = ['title',
-                  'creator']
+                  'creator_name']
+
+    def get_creator_name(self, obj):
+        return obj.creator.name
 
 class IndividualExpenseSerializer(serializers.ModelSerializer):
     expense = ExpenseSerializer2()
+    user_name = serializers.SerializerMethodField()
     class Meta:
         model = models.UserExpense
         fields = ['expense',
-                  'user',
+                  'user_name',
                   'amount_owed',
                   'percentage_owed']
 
-
-class ExpenseSerializer3(serializers.ModelSerializer):
-    class Meta:
-        model = models.Expense
-        fields = ['title',
-                  'creator',
-                  'amount',
-                  'split_type',
-                  'date_created',]
+    def get_user_name(self, obj):
+        return obj.user.name
 
 
 class UserExpenseSerializer2(serializers.ModelSerializer):

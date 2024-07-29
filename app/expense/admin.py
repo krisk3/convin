@@ -1,3 +1,6 @@
+"""
+Configure models to be managed via django admin panel.
+"""
 from django.contrib import admin
 from . import models
 
