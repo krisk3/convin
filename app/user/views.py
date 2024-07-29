@@ -1,5 +1,6 @@
 from . import serializers
 from . import models
+from django.db.models import Q
 from rest_framework import status, generics
 from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView, ListAPIView
@@ -9,12 +10,13 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.pagination import PageNumberPagination
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 
-# Create your views here.
+
 class UserCreateView(APIView):
     queryset = models.User.objects.all()
     serializer_class = serializers.UserSerializer
 
     def post(self, request):
+        """Create a new user"""
         serializer = serializers.UserSerializer(data=request.data)
         if serializer.is_valid():
             if serializer.validated_data['mobile'] == "":
@@ -31,29 +33,35 @@ class UserCreateView(APIView):
 
 @extend_schema(
 parameters=[
-    OpenApiParameter(name='email', type=OpenApiTypes.EMAIL, description='Email of the user.', required=False,),
-    OpenApiParameter(name='mobile', type=OpenApiTypes.STR, description='Mobile of the user.', required=False,),
+    OpenApiParameter(name='email', type=OpenApiTypes.EMAIL, description='Comma separated emails of the users.', required=False,),
+    OpenApiParameter(name='mobile', type=OpenApiTypes.STR, description='Comma separated mobiles of the users.', required=False,),
 ],
 responses={status.HTTP_200_OK: serializers.UserSerializer()})
 class UserListView(APIView):
-    queryset = models.User.objects.all()
+    """Retrieve users using their email or mobile number."""
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     serializer_class = serializers.UserSerializer
 
     def get(self, request, *args, **kwargs):
         email = request.query_params.get('email', None)
         mobile = request.query_params.get('mobile', None)
 
-        if email:
-            user = models.User.objects.filter(email=email).first()
+        if email and mobile:
+            email_list = [mail.strip() for mail in email.split(',')]
+            mobile_list = [mob.strip() for mob in mobile.split(',')]
+            user = models.User.objects.filter(Q(email__in=email_list) | Q(mobile__in=mobile_list))
+        elif email:
+            email_list = [mail.strip() for mail in email.split(',')]
+            user = models.User.objects.filter(email__in=email_list)
         elif mobile:
-            user = models.User.objects.filter(mobile=mobile).first()
-        elif email and mobile:
-            user = models.User.objects.filter(email=email, mobile=mobile).first()
+            mobile_list = [mob.strip() for mob in mobile.split(',')]
+            user = models.User.objects.filter(mobile__in=mobile_list)
         else:
             return Response({"error": "Email or mobile number must be provided."}, status=status.HTTP_400_BAD_REQUEST)
 
-        if user:
-            serializer = serializers.UserSerializer(user)
+        if user.exists():
+            serializer = serializers.UserSerializer(user, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "Users not found."}, status=status.HTTP_404_NOT_FOUND)
