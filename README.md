@@ -20,20 +20,23 @@ Open docker desktop / docker daemon.
 
 Open the terminal.
 
-Setup git using the following commands in the terminal
+Setup git by running the following commands in the terminal
 ```bash
 git config --global user.name "Your Name"
 git config --global user.email "your.email@example.com"
 ```
 
-Clone the repository using the following command in the terminal
+Clone the repository by running the following command in the terminal
 ```bash
 git clone https://github.com/krisk3/convin.git
 ```
 
-Open the project directory.
+Open the project directory by running the following command in the terminal
+```bash
+cd convin
+```
 
-Turn up the server using the following command in the terminal
+Start the server by running the following command in the terminal
 ```bash
 docker-compose up
 ```
