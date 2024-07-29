@@ -30,3 +30,20 @@ class ExpenseSerializer(serializers.ModelSerializer):
                   'creator',
                   'user_expense',]
         read_only_fields = ['creator']
+
+
+class ExpenseSerializer2(serializers.ModelSerializer):
+    class Meta:
+        model = models.Expense
+        fields = ['title',
+                  'creator']
+
+class IndividualExpenseSerializer(serializers.ModelSerializer):
+    expense = ExpenseSerializer2()
+    class Meta:
+        model = models.UserExpense
+        fields = ['expense',
+                  'user',
+                  'amount_owed',
+                  'percentage_owed']
+
